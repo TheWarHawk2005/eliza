@@ -1,4 +1,4 @@
-izexports.handler = async (event, context) => {
+exports.handler = async (event, context) => {
   const data = JSON.parse(event.body || "{}");
   const version = "0.0.0"
   return {
