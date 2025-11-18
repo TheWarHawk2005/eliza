@@ -5,7 +5,6 @@
 const version = "0.0.0"
 
 // Load emailjs
-import fetch from 'node-fetch';
 
 var emailjs = (function(e) {
     "use strict";
@@ -162,7 +161,7 @@ exports.handler = async (event, context) => {
     if (origin !== allowedOrigin) {
         return {
             statusCode: 403,
-            headers: { "Content-Type": "application/json" },
+            headers: corsHeaders,
             body: JSON.stringify({ error: "Origin not allowed" })
         };
     }
