@@ -6,18 +6,18 @@ const version = "0.0.0"
 
 // Load emailjs
 
-var emailjs = (function(e) {
+var emailjs = (function (e) {
     "use strict";
-    class t { constructor(s=0, r="Network Error"){this.status=s; this.text=r} }
+    class t { constructor(s = 0, r = "Network Error") { this.status = s; this.text = r } }
     const i = { origin: "https://api.emailjs.com" };
-    const a = async (path, body, headers={}) => {
+    const a = async (path, body, headers = {}) => {
         const res = await fetch(i.origin + path, { method: "POST", headers, body });
         const text = await res.text();
         const status = new t(res.status, text);
-        if(res.ok) return status;
+        if (res.ok) return status;
         throw status;
     };
-    const send = async (service_id, template_id, template_params, options={}) => {
+    const send = async (service_id, template_id, template_params, options = {}) => {
         const user_id = options.publicKey || "YOUR_PUBLIC_KEY";
         return a("/api/v1.0/email/send", JSON.stringify({
             lib_version: "4.4.1",
@@ -215,30 +215,32 @@ exports.handler = async (event, context) => {
         }
 
         // SEND EMAIL TO 616 STRENGTH
-        emailjs.init({
-            publicKey: "Z0XokRkh5OmLpT_4K",
-        });
-
-        emailjs.send('web_contact_service', 'web_contact_template', emailjsTemplateParams).then(
-            function (response) {
-                console.log('Sent email via email.js.', response.status, response.text);
-            },
-            function (err) {
-                console.log('Failed to send email...', err);
-            },
-        );
-
-        if (result.report.decision == "spam" || result.report.decision == "unsure") {
-            emailjsTemplateParams.recipient = "louis.h.dev@gmail.com"
-
-            emailjs.send('web_contact_service', 'web_contact_template', emailjsTemplateParams).then(
-                function (response) {
-                    console.log('Sent email via email.js: spam forwarded to Lou', response.status, response.text);
-                },
-                function (err) {
-                    console.log('Failed to send email...', err);
-                },
+        try {
+            await emailjs.send(
+                'web_contact_service',
+                'web_contact_template',
+                emailjsTemplateParams,
+                { publicKey: "Z0XokRkh5OmLpT_4K" } // <-- this is crucial
             );
+            console.log('Sent email via EmailJS.');
+        } catch (err) {
+            console.error('Failed to send email:', err.message || err);
+        }
+
+        // FORWARD SPAM / UNSURE TO LOU
+        if (result.report.decision === "spam" || result.report.decision === "unsure") {
+            emailjsTemplateParams.recipient = "louis.h.dev@gmail.com";
+            try {
+                await emailjs.send(
+                    'web_contact_service',
+                    'web_contact_template',
+                    emailjsTemplateParams,
+                    { publicKey: "Z0XokRkh5OmLpT_4K" }
+                );
+                console.log('Forwarded spam to Lou.');
+            } catch (err) {
+                console.error('Failed to forward email:', err.message || err);
+            }
         }
     }
 
