@@ -5,7 +5,31 @@
 const version = "0.0.0"
 
 // Load emailjs
-var emailjs = (function(e){"use strict";class t{constructor(e=0,s="Network Error"){this.status=e,this.text=s}};const i={origin:"https://api.emailjs.com",storageProvider:{get:e=>Promise.resolve(null),set:(e,t)=>Promise.resolve(),remove:e=>Promise.resolve()}};const r=e=>e?typeof e=="string"?{publicKey:e}:"[object Object]"===e.toString()?e:{}:{};const o=(e,s="https://api.emailjs.com")=>{if(!e)return;const n=r(e);i.publicKey=n.publicKey,i.storageProvider=n.storageProvider,i.blockList=n.blockList,i.limitRate=n.limitRate,i.origin=n.origin||s};const a=async(e,t,n={})=>{const o=await fetch(i.origin+e,{method:"POST",headers:n,body:t}),r=await o.text(),s=new t(o.status,r);if(o.ok)return s;throw s};const send=async(e,t,n,p)=>{const u=r(p),b=u.publicKey||i.publicKey,f=u.storageProvider||i.storageProvider;const v={lib_version:"4.4.1",user_id:b,service_id:e,template_id:t,template_params:n};return a("/api/v1.0/email/send",JSON.stringify(v),{"Content-type":"application/json"})};return e.init=o,e.send=send,e.EmailJSResponseStatus=t,e})(emailjs||{});
+import fetch from 'node-fetch';
+
+var emailjs = (function(e) {
+    "use strict";
+    class t { constructor(s=0, r="Network Error"){this.status=s; this.text=r} }
+    const i = { origin: "https://api.emailjs.com" };
+    const a = async (path, body, headers={}) => {
+        const res = await fetch(i.origin + path, { method: "POST", headers, body });
+        const text = await res.text();
+        const status = new t(res.status, text);
+        if(res.ok) return status;
+        throw status;
+    };
+    const send = async (service_id, template_id, template_params, options={}) => {
+        const user_id = options.publicKey || "YOUR_PUBLIC_KEY";
+        return a("/api/v1.0/email/send", JSON.stringify({
+            lib_version: "4.4.1",
+            user_id,
+            service_id,
+            template_id,
+            template_params
+        }), { "Content-Type": "application/json" });
+    };
+    return { send };
+})();
 
 function writeReport(score, confidence) {
     // string = human-readable message
