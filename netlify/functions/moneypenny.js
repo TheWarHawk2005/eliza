@@ -116,15 +116,30 @@ function evaluate(string) {
 // accept a POST request with a spam string
 exports.handler = async (event, context) => {
     // Handle CORS preflight (OPTIONS request)
+    const allowedOrigin = "https://616strength.com";
+    const origin = event.headers.origin;
+
+    const corsHeaders = {
+        "Access-Control-Allow-Origin": allowedOrigin,
+        "Access-Control-Allow-Headers": "Content-Type",
+        "Access-Control-Allow-Methods": "POST, OPTIONS"
+    };
+
+    // Handle OPTIONS preflight
     if (event.httpMethod === "OPTIONS") {
         return {
             statusCode: 200,
-            headers: {
-                "Access-Control-Allow-Origin": "https://616strength.com",
-                "Access-Control-Allow-Headers": "Content-Type",
-                "Access-Control-Allow-Methods": "POST, OPTIONS"
-            },
+            headers: corsHeaders,
             body: ""
+        };
+    }
+
+    // Reject requests from other origins
+    if (origin !== allowedOrigin) {
+        return {
+            statusCode: 403,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ error: "Origin not allowed" })
         };
     }
 
@@ -187,7 +202,7 @@ exports.handler = async (event, context) => {
 
         if (result.report.decision == "spam" || result.report.decision == "unsure") {
             emailjsTemplateParams.recipient = "louis.h.dev@gmail.com"
-            
+
             emailjs.send('web_contact_service', 'web_contact_template', emailjsTemplateParams).then(
                 function (response) {
                     console.log('Sent email via email.js: spam forwarded to Lou', response.status, response.text);
@@ -201,11 +216,8 @@ exports.handler = async (event, context) => {
 
     return {
         statusCode: 200,
-        headers: {
-            "Access-Control-Allow-Origin": "https://616strength.com",
-            "Access-Control-Allow-Headers": "Content-Type",
-            "Access-Control-Allow-Methods": "POST, OPTIONS"
-        },
+        headers: corsHeaders,
         body: JSON.stringify(result)
     };
+
 };
