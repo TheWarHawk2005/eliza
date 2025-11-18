@@ -172,20 +172,21 @@ exports.handler = async (event, context) => {
     try {
         data = JSON.parse(event.body || "{}");
         console.log(data)
-
     } catch (e) {
         return { statusCode: 400, body: JSON.stringify({ error: "Invalid JSON" }) };
     }
-    var result
+
+    var result;
+
     if (data.task == "evaluate_string" && typeof data.body === "string") {
         result = evaluate(data.body);
     }
 
-    if (data.task == "evaluate_array" && typeof data.body === "array") {
+    if (data.task == "evaluate_array" && Array.isArray(data.body)) { // <--- fix here
         console.error("task not available yet")
     }
 
-    if (data.task == "check_form") {
+    if (data.task == "check_form" && data.body && typeof data.body === "object") { // <--- fix here
         formEmail = data.body.email
         formName = data.body.name
         formMessage = data.body.message
@@ -211,12 +212,10 @@ exports.handler = async (event, context) => {
             user_name: formName,
             message: formMessage,
             recipient: "616strength@gmail.com",
-
             moneypenny_evaluation: result // send moneypenny analysis data just for kicks and giggles
         }
 
         // SEND EMAIL TO 616 STRENGTH
-
         emailjs.init({
             publicKey: "Z0XokRkh5OmLpT_4K",
         });
@@ -249,5 +248,4 @@ exports.handler = async (event, context) => {
         headers: corsHeaders,
         body: JSON.stringify(result)
     };
-
 };
