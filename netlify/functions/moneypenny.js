@@ -144,8 +144,14 @@ exports.handler = async (event, context) => {
     }
 
     // Normal POST request
-    const data = JSON.parse(event.body || "{}");
-    console.log(event)
+    let data = {};
+    try {
+        data = JSON.parse(event.body || "{}");
+        console.log(data)
+
+    } catch (e) {
+        return { statusCode: 400, body: JSON.stringify({ error: "Invalid JSON" }) };
+    }
     var result
     if (data.task == "evaluate_string" && typeof data.body === "string") {
         result = evaluate(data.body);
@@ -170,9 +176,9 @@ exports.handler = async (event, context) => {
 
         // one string for scoring
         const formEval = evaluate(formParts.join(" "));
-        
+
         result = formEval
-        result.report = writeFormReport(score, spamConfidence)
+        result.report = writeFormReport(result.spam_score, result.spam_confidence, nameEval, messageEval)
         result.name_evaluation = nameEval
         result.message_evaluation = messageEval
 
@@ -186,6 +192,11 @@ exports.handler = async (event, context) => {
         }
 
         // SEND EMAIL TO 616 STRENGTH
+
+        emailjs.init({
+            publicKey: "Z0XokRkh5OmLpT_4K",
+        });
+
         emailjs.send('web_contact_service', 'web_contact_template', emailjsTemplateParams).then(
             function (response) {
                 console.log('Sent email via email.js.', response.status, response.text);
