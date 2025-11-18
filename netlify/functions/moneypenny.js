@@ -145,7 +145,7 @@ exports.handler = async (event, context) => {
 
     // Normal POST request
     const { data } = JSON.parse(event.body || "{}");
-
+    console.log(data)
     var result
     if (data.task == "evaluate_string" && typeof data.body === "string") {
         result = evaluate(data.body);
