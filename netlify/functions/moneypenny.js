@@ -170,16 +170,11 @@ exports.handler = async (event, context) => {
 
         // one string for scoring
         const formEval = evaluate(formParts.join(" "));
-
-        result = {
-            version: version,
-            aggregatedData: data,
-            spam_score: score,
-            spam_confidence: spamConfidence,
-            name_evaluation: nameEval,
-            message_evaluation: messageEval,
-            report: writeFormReport(score, spamConfidence),
-        }
+        
+        result = formEval
+        result.report = writeFormReport(score, spamConfidence)
+        result.name_evaluation = nameEval
+        result.message_evaluation = messageEval
 
         const emailjsTemplateParams = {
             user_email: formEmail,
