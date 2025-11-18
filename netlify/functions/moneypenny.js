@@ -106,13 +106,31 @@ function evaluate(string) {
 
 // accept a POST request with a spam string
 exports.handler = async (event, context) => {
+    // Handle CORS preflight (OPTIONS request)
+    if (event.httpMethod === "OPTIONS") {
+        return {
+            statusCode: 200,
+            headers: {
+                "Access-Control-Allow-Origin": "https://616strength.com",
+                "Access-Control-Allow-Headers": "Content-Type",
+                "Access-Control-Allow-Methods": "POST, OPTIONS"
+            },
+            body: ""
+        };
+    }
+
+    // Normal POST request
     const { string } = JSON.parse(event.body || "{}");
 
     const result = evaluate(string);
 
     return {
         statusCode: 200,
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Access-Control-Allow-Origin": "https://616strength.com",
+            "Access-Control-Allow-Headers": "Content-Type",
+            "Access-Control-Allow-Methods": "POST, OPTIONS"
+        },
         body: JSON.stringify(result)
     };
 };
