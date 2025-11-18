@@ -148,7 +148,7 @@ exports.handler = async (event, context) => {
 
     var result
     if (data.task == "evaluate_string" && typeof data.body === "string") {
-        result = evaluate(data.string);
+        result = evaluate(data.body);
     }
 
     if (data.task == "evaluate_array" && typeof data.body === "array") {
