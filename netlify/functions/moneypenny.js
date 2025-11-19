@@ -8,7 +8,7 @@ console.log("PUBLIC:", process.env.MJ_APIKEY_PUBLIC);
 console.log("PRIVATE:", process.env.MJ_APIKEY_PRIVATE);
 
 
-const mailjet = require('node-mailjet').connect(
+const mailjet = require('node-mailjet').apiConnect(
     process.env.MJ_APIKEY_PUBLIC,
     process.env.MJ_APIKEY_PRIVATE
 )
