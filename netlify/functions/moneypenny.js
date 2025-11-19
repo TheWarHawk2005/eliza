@@ -13,32 +13,6 @@ const mailjet = require('node-mailjet').apiConnect(
     process.env.MJ_APIKEY_PRIVATE
 )
 
-// Load emailjs
-
-var emailjs = (function (e) {
-    "use strict";
-    class t { constructor(s = 0, r = "Network Error") { this.status = s; this.text = r } }
-    const i = { origin: "https://api.emailjs.com" };
-    const a = async (path, body, headers = {}) => {
-        const res = await fetch(i.origin + path, { method: "POST", headers, body });
-        const text = await res.text();
-        const status = new t(res.status, text);
-        if (res.ok) return status;
-        throw status;
-    };
-    const send = async (service_id, template_id, template_params, options = {}) => {
-        const user_id = options.publicKey || "YOUR_PUBLIC_KEY";
-        return a("/api/v1.0/email/send", JSON.stringify({
-            lib_version: "4.4.1",
-            user_id,
-            service_id,
-            template_id,
-            template_params
-        }), { "Content-Type": "application/json" });
-    };
-    return { send };
-})();
-
 function writeReport(score, confidence) {
     // string = human-readable message
     if (score >= 4) return { decision: "spam", string: "likely bot spam" }
@@ -197,7 +171,7 @@ exports.handler = async (event, context) => {
     if (data.task == "test_mailjet") {
         console.log('testing mailjet...')
 
-        const request = mailjet.post('send', { version: 'v3.1' }).request({
+        const request = await mailjet.post('send', { version: 'v3.1' }).request({
             Messages: [
                 {
                     From: {
