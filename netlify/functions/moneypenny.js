@@ -4,6 +4,11 @@
 // Miss Moneypenny's complete script. Running on the server.
 const version = "0.0.0"
 
+const mailjet = require('node-mailjet').connect(
+    process.env.MJ_APIKEY_PUBLIC,
+    process.env.MJ_APIKEY_PRIVATE
+)
+
 // Load emailjs
 
 var emailjs = (function (e) {
@@ -183,6 +188,38 @@ exports.handler = async (event, context) => {
 
     if (data.task == "evaluate_array" && Array.isArray(data.body)) { // <--- fix here
         console.error("task not available yet")
+    }
+
+    if (data.task == "test_mailjet") {
+        console.log('testing mailjet...')
+
+        const request = mailjet.post('send', { version: 'v3.1' }).request({
+            Messages: [
+                {
+                    From: {
+                        Email: 'louis.h.dev@gmail.com',
+                        Name: 'Ms. Moneypenny',
+                    },
+                    To: [
+                        {
+                            Email: 'louis.h.dev@gmail.com',
+                            Name: 'You',
+                        },
+                    ],
+                    Subject: 'Mailjet Test',
+                    TextPart: 'Mailjet test email.',
+                    HTMLPart:
+                        '<h3>html header test</h3>',
+                },
+            ],
+        })
+        request
+            .then(result => {
+                console.log(result.body)
+            })
+            .catch(err => {
+                console.log(err.statusCode)
+            })
     }
 
     if (data.task == "check_form" && data.body && typeof data.body === "object") { // <--- fix here
