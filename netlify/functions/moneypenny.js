@@ -4,6 +4,10 @@
 // Miss Moneypenny's complete script. Running on the server.
 const version = "0.0.0"
 
+console.log("PUBLIC:", process.env.MJ_APIKEY_PUBLIC);
+console.log("PRIVATE:", process.env.MJ_APIKEY_PRIVATE);
+
+
 const mailjet = require('node-mailjet').connect(
     process.env.MJ_APIKEY_PUBLIC,
     process.env.MJ_APIKEY_PRIVATE
