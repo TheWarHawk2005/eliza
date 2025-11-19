@@ -171,33 +171,27 @@ exports.handler = async (event, context) => {
     if (data.task == "test_mailjet") {
         console.log('testing mailjet...')
 
-        const request = await mailjet.post('send', { version: 'v3.1' }).request({
-            Messages: [
-                {
-                    From: {
-                        Email: 'louis.h.dev@gmail.com',
-                        Name: 'Ms. Moneypenny',
-                    },
-                    To: [
+        if (data.task == "test_mailjet") {
+            console.log('testing mailjet...');
+
+            try {
+                const result = await mailjet.post('send', { version: 'v3.1' }).request({
+                    Messages: [
                         {
-                            Email: 'louis.h.dev@gmail.com',
-                            Name: 'You',
+                            From: { Email: 'louis.h.dev@gmail.com', Name: 'Ms. Moneypenny' },
+                            To: [{ Email: 'louis.h.dev@gmail.com', Name: 'You' }],
+                            Subject: 'Mailjet Test',
+                            TextPart: 'Mailjet test email.',
+                            HTMLPart: '<h3>html header test</h3>',
                         },
                     ],
-                    Subject: 'Mailjet Test',
-                    TextPart: 'Mailjet test email.',
-                    HTMLPart:
-                        '<h3>html header test</h3>',
-                },
-            ],
-        })
-        request
-            .then(result => {
-                console.log(result.body)
-            })
-            .catch(err => {
-                console.log(err.statusCode)
-            })
+                });
+
+                console.log(result.body); // success
+            } catch (err) {
+                console.error(err.statusCode || err.message); // failed
+            }
+        }
     }
 
     if (data.task == "check_form" && data.body && typeof data.body === "object") { // <--- fix here
