@@ -215,7 +215,7 @@ exports.handler = async (event, context) => {
         result.name_evaluation = nameEval
         result.message_evaluation = messageEval
 
-        const emailjsTemplateParams = {
+        const templateVariables = {
             user_email: formEmail,
             user_name: formName,
             message: formMessage,
@@ -224,38 +224,32 @@ exports.handler = async (event, context) => {
         }
 
         // SEND EMAIL TO 616 STRENGTH
-        try {
-            await emailjs.send(
-                'web_contact_service',
-                'web_contact_template',
-                emailjsTemplateParams,
-                { publicKey: "Z0XokRkh5OmLpT_4K" } // <-- this is crucial
-            );
-            console.log('Sent email via EmailJS.');
-        } catch (err) {
-            console.error('Failed to send email:', err.message || err);
-        }
+        if (data.task == "check_form") {
+            console.log('sending email...');
 
-        // FORWARD SPAM / UNSURE TO LOU
-        if (result.report.decision === "spam" || result.report.decision === "unsure") {
-            emailjsTemplateParams.recipient = "louis.h.dev@gmail.com";
             try {
-                await emailjs.send(
-                    'web_contact_service',
-                    'web_contact_template',
-                    emailjsTemplateParams,
-                    { publicKey: "Z0XokRkh5OmLpT_4K" }
-                );
-                console.log('Forwarded spam to Lou.');
+                const result = await mailjet.post('send', { version: 'v3.1' }).request({
+                    TemplateID: 1,
+                    TemplateLanguage: true,
+                    Variables: templateVariables,
+                    Messages: [
+                        {
+                            From: { Email: '616strength@gmail.com', Name: '616 Strength & Nutrition' },
+                            To: [{ Email: '616strength@gmail.com', Name: '616 Strength & Nutrition' }],
+                            Subject: `New Message from ${templateVariables.formName}`
+                        },
+                    ],
+                });
+
+                console.log(result.body); // success
             } catch (err) {
-                console.error('Failed to forward email:', err.message || err);
+                console.error(err.statusCode || err.message); // failed
             }
         }
-    }
 
-    return {
-        statusCode: 200,
-        headers: corsHeaders,
-        body: JSON.stringify(result)
+        return {
+            statusCode: 200,
+            headers: corsHeaders,
+            body: JSON.stringify(result)
+        };
     };
-};
