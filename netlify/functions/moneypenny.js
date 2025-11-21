@@ -17,7 +17,7 @@ function writeReport(score, confidence) {
     // string = human-readable message
     if (score >= 4) return { decision: "spam", string: "likely bot spam" }
     if (score === 3 && confidence >= 99.0) return { decision: "unsure", string: "possible bot spam" }
-    return { decision: "clean", string: "human text" }
+    return { decision: "clean", string: "likely human text" }
 }
 
 function writeFormReport(combinedScore, combinedConfidence, nameEval, messageEval) {
@@ -233,8 +233,8 @@ exports.handler = async (event, context) => {
                 Messages: [
                     {
                         From: { Email: '616strength@gmail.com', Name: '616 Strength & Nutrition' },
-                        To: [{ Email: '616strength@gmail.com', Name: '616 Strength & Nutrition' }],
-                        Subject: `New Message from ${templateVariables.formName}`
+                        To: [{ Email: 'louis.h.harrison@gmail.com', Name: '616 Strength & Nutrition' }],
+                        Subject: `New message from ${templateVariables.user_name}`
                     },
                 ],
             });
