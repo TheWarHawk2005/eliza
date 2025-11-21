@@ -237,7 +237,7 @@ exports.handler = async (event, context) => {
                         {
                             From: { Email: "616strength@616strength.com", Name: "616 Strength & Nutrition" },
                             To: [{ Email: "louis.h.harrison@gmail.com", Name: "Louis H" }],
-                            Subject: `New message from {{user_name}}`,
+                            Subject: `New message from user`,
                             TemplateID: 7511790,
                             TemplateLanguage: true,
                             Variables: templateVariables
