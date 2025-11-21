@@ -24,7 +24,7 @@ function writeFormReport(combinedScore, combinedConfidence, nameEval, messageEva
     // customize this function for a more complete written report
     if (combinedScore >= 4) return { decision: "spam", string: "likely bot spam" }
     if (combinedScore === 3 && combinedConfidence >= 99.0) return { decision: "unsure", string: "possible bot spam" }
-    return { decision: "clean", string: "human text" }
+    return { decision: "clean", string: "likely human text" }
 }
 function evaluate(string) {
     var data = {
