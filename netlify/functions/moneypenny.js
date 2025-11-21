@@ -162,6 +162,8 @@ exports.handler = async (event, context) => {
 
     if (data.task == "evaluate_string" && typeof data.body === "string") {
         result = evaluate(data.body);
+
+
     }
 
     if (data.task == "evaluate_array" && Array.isArray(data.body)) { // <--- fix here
@@ -195,9 +197,9 @@ exports.handler = async (event, context) => {
     }
 
     if (data.task == "check_form" && data.body && typeof data.body === "object") { // <--- fix here
-        formEmail = data.body.email
-        formName = data.body.name
-        formMessage = data.body.message
+        const formEmail = data.body.email
+        const formName = data.body.name
+        const formMessage = data.body.message
 
         const nameEval = formName ? evaluate(data.body.name) : null
         const messageEval = formMessage ? evaluate(data.body.message) : null
@@ -224,33 +226,29 @@ exports.handler = async (event, context) => {
         }
 
         // SEND EMAIL TO 616 STRENGTH
-        if (data.task == "check_form") {
-            console.log('sending email...');
+        try {
+            const result = await mailjet.post('send', { version: 'v3.1' }).request({
+                TemplateID: 7511636,
+                TemplateLanguage: true,
+                Variables: templateVariables,
+                Messages: [
+                    {
+                        From: { Email: '616strength@gmail.com', Name: '616 Strength & Nutrition' },
+                        To: [{ Email: '616strength@gmail.com', Name: '616 Strength & Nutrition' }],
+                        Subject: `New Message from ${templateVariables.formName}`
+                    },
+                ],
+            });
 
-            try {
-                const result = await mailjet.post('send', { version: 'v3.1' }).request({
-                    TemplateID: 7511636,
-                    TemplateLanguage: true,
-                    Variables: templateVariables,
-                    Messages: [
-                        {
-                            From: { Email: '616strength@gmail.com', Name: '616 Strength & Nutrition' },
-                            To: [{ Email: '616strength@gmail.com', Name: '616 Strength & Nutrition' }],
-                            Subject: `New Message from ${templateVariables.formName}`
-                        },
-                    ],
-                });
-
-                console.log(result.body); // success
-            } catch (err) {
-                console.error(err.statusCode || err.message); // failed
-            }
+            console.log(result.body); // success
+        } catch (err) {
+            console.error(err.statusCode || err.message); // failed
         }
+    }
 
-        return {
-            statusCode: 200,
-            headers: corsHeaders,
-            body: JSON.stringify(result)
-        };
+    return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify(result)
     };
 }
