@@ -13,14 +13,6 @@ const mailjet = require('node-mailjet').apiConnect(
     process.env.MJ_APIKEY_PRIVATE
 )
 
-function safeForMailjet(str) {
-    return str
-        .replace(/"/g, '\\"')
-        .replace(/{/g, "\\{")
-        .replace(/}/g, "\\}")
-        .replace(/%/g, "%%");
-}
-
 function writeReport(score, confidence) {
     // string = human-readable message
     if (score >= 4) return { decision: "spam", string: "likely bot spam" }
@@ -228,9 +220,11 @@ exports.handler = async (event, context) => {
             user_email: formEmail,
             user_name: formName,
             message: formMessage,
-            moneypenny_evaluation: safeForMailjet(JSON.stringify(result, null, 2))
-            // send moneypenny analysis data just for kicks and giggles
-        }
+            moneypenny_report: result.report.string,
+            moneypenny_score: result.spam_score,
+            moneypenny_confidence: result.spam_confidence
+        };
+
 
         // SEND EMAIL TO 616 STRENGTH
         try {
