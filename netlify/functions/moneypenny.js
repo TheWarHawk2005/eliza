@@ -231,8 +231,8 @@ exports.handler = async (event, context) => {
                 .request({
                     Messages: [
                         {
-                            From: { Email: "616strength@gmail.com", Name: "616 Strength & Nutrition" },
-                            To: [{ Email: "louis.h.harrison@gmail.com", Name: "616 Strength & Nutrition" }],
+                            From: { Email: "616strength@616strength.com", Name: "616 Strength & Nutrition" },
+                            To: [{ Email: "louis.h.harrison@gmail.com", Name: "Louis H" }],
                             Subject: `New Message from ${formName}`,
                             TemplateID: 7511636,
                             TemplateLanguage: true,
