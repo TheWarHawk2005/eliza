@@ -225,6 +225,8 @@ exports.handler = async (event, context) => {
             moneypenny_confidence: result.spam_confidence
         };
 
+        console.log("=== VARIABLES SENT TO MAILJET ===");
+        console.log(JSON.stringify(templateVariables, null, 2));
 
         // SEND EMAIL TO 616 STRENGTH
         try {
