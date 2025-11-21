@@ -229,7 +229,7 @@ exports.handler = async (event, context) => {
 
             try {
                 const result = await mailjet.post('send', { version: 'v3.1' }).request({
-                    TemplateID: 1,
+                    TemplateID: 7511636,
                     TemplateLanguage: true,
                     Variables: templateVariables,
                     Messages: [
