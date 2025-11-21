@@ -220,8 +220,8 @@ exports.handler = async (event, context) => {
             user_email: formEmail,
             user_name: formName,
             message: formMessage,
-            recipient: "616strength@gmail.com",
-            moneypenny_evaluation: result // send moneypenny analysis data just for kicks and giggles
+            moneypenny_evaluation: JSON.stringify(result, null, 2)
+            // send moneypenny analysis data just for kicks and giggles
         }
 
         // SEND EMAIL TO 616 STRENGTH
