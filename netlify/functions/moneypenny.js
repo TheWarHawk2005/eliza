@@ -162,8 +162,7 @@ exports.handler = async (event, context) => {
 
     if (data.task == "evaluate_string" && typeof data.body === "string") {
         result = evaluate(data.body);
-
-
+        console.log(result)
     }
 
     if (data.task == "evaluate_array" && Array.isArray(data.body)) { // <--- fix here
