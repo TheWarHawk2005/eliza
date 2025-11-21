@@ -245,9 +245,21 @@ exports.handler = async (event, context) => {
 
             console.log(mailjetResult.body);
         } catch (err) {
-            console.error("Mailjet error:", err.statusCode || err.message || err);
-        }
+            console.error("=== MAILJET ERROR ===");
 
+            // Full raw error object
+            console.error(err);
+
+            // Mailjet API error body (the detailed part)
+            if (err.response && err.response.body) {
+                console.error("=== MAILJET ERROR BODY ===");
+                console.error(JSON.stringify(err.response.body, null, 2));
+            }
+
+            // Fallback if the structure is different
+            console.error("=== ERROR MESSAGE ===");
+            console.error(err.statusCode || err.message || "Unknown Mailjet error");
+        }
 
         return {
             statusCode: 200,
