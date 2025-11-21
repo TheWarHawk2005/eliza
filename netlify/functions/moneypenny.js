@@ -226,28 +226,31 @@ exports.handler = async (event, context) => {
 
         // SEND EMAIL TO 616 STRENGTH
         try {
-            const result = await mailjet.post('send', { version: 'v3.1' }).request({
-                TemplateID: 7511636,
-                TemplateLanguage: true,
-                Variables: templateVariables,
-                Messages: [
-                    {
-                        From: { Email: '616strength@gmail.com', Name: '616 Strength & Nutrition' },
-                        To: [{ Email: 'louis.h.harrison@gmail.com', Name: '616 Strength & Nutrition' }],
-                        Subject: `New message from ${templateVariables.user_name}`
-                    },
-                ],
-            });
+            const mailjetResult = await mailjet
+                .post("send", { version: "v3.1" })
+                .request({
+                    Messages: [
+                        {
+                            From: { Email: "616strength@gmail.com", Name: "616 Strength & Nutrition" },
+                            To: [{ Email: "louis.h.harrison@gmail.com", Name: "616 Strength & Nutrition" }],
+                            Subject: `New Message from ${formName}`,
+                            TemplateID: 7511636,
+                            TemplateLanguage: true,
+                            Variables: templateVariables
+                        }
+                    ]
+                });
 
-            console.log(result.body); // success
+            console.log(mailjetResult.body);
         } catch (err) {
-            console.error(err.statusCode || err.message); // failed
+            console.error("Mailjet error:", err.statusCode || err.message || err);
         }
-    }
 
-    return {
-        statusCode: 200,
-        headers: corsHeaders,
-        body: JSON.stringify(result)
-    };
+
+        return {
+            statusCode: 200,
+            headers: corsHeaders,
+            body: JSON.stringify(result)
+        };
+    }
 }
