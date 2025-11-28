@@ -4,7 +4,6 @@
 // Miss Moneypenny's complete script. Running on the server.
 const version = "0.0.0"
 
-import { randomUUID } from 'crypto';
 import FormData from 'form-data'; // form-data v4.0.1
 import Mailgun from 'mailgun.js'; // mailgun.js v11.1.0
 
