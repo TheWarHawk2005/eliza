@@ -124,7 +124,7 @@ async function sendMailgunEmail(variables) {
     try {
         const data = await mg.messages.create('616strength.com', {
             from: '616 Strength & Nutrition <616strength.com@616strength.com>',
-            to: ['Louis Harrison <616strength@616strength.com>'],
+            to: ['616 Strength & Nutrition <616strength@616strength.com>'],
             subject: `New Message From ${variables.user_name}`,
             text: '',
             template: "616 Strength Website Notification",
@@ -215,7 +215,7 @@ exports.handler = async (event, context) => {
         };
     }
 
-    if (data.task == "check_form" && data.body && typeof data.body === "object") { // <--- fix here
+    if (data.task == "check_form" && data.body && typeof data.body === "object") {
         const formEmail = data.body.email
         const formName = data.body.name
         const formMessage = data.body.message
@@ -245,11 +245,11 @@ exports.handler = async (event, context) => {
             moneypenny_confidence: result.spam_confidence
         };
 
-        console.log("=== VARIABLES SENT TO MAILJET ===");
-        console.log(JSON.stringify(templateVariables, null, 2));
-
         // SEND EMAIL TO 616 STRENGTH
         sendMailgunEmail(templateVariables);
+
+        console.log("=== VARIABLES SENT TO MAILGUN ===");
+        console.log(JSON.stringify(templateVariables, null, 2));
 
         return {
             statusCode: 200,
