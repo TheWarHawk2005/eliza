@@ -4,14 +4,8 @@
 // Miss Moneypenny's complete script. Running on the server.
 const version = "0.0.0"
 
-console.log("PUBLIC:", process.env.MJ_APIKEY_PUBLIC);
-console.log("PRIVATE:", process.env.MJ_APIKEY_PRIVATE);
-
-
-const mailjet = require('node-mailjet').apiConnect(
-    process.env.MJ_APIKEY_PUBLIC,
-    process.env.MJ_APIKEY_PRIVATE
-)
+import FormData from 'form-data'; // form-data v4.0.1
+import Mailgun from 'mailgun.js'; // mailgun.js v11.1.0
 
 function writeReport(score, confidence) {
     // string = human-readable message
@@ -26,6 +20,7 @@ function writeFormReport(combinedScore, combinedConfidence, nameEval, messageEva
     if (combinedScore === 3 && combinedConfidence >= 99.0) return { decision: "unsure", string: "possible bot spam" }
     return { decision: "clean", string: "likely human text" }
 }
+
 function evaluate(string) {
     var data = {
         length: string.length,
@@ -117,6 +112,31 @@ function evaluate(string) {
     return evaluation
 }
 
+async function sendMailgunEmail(variables) {
+    const mailgun = new Mailgun(FormData);
+    const mg = mailgun.client({
+        username: 'api',
+        key:
+            process.env.API_KEY,
+        // When you have an EU-domain, you must specify the endpoint:
+        // url: "https://api.eu.mailgun.net"
+    });
+    try {
+        const data = await mg.messages.create('616strength.com', {
+            from: '616 Strength & Nutrition <616strength.com@616strength.com>',
+            to: ['Louis Harrison <616strength@616strength.com>'],
+            subject: `New Message From ${variables.user_name}`,
+            text: '',
+            template: "616 Strength Website Notification",
+            "h:X-Mailgun-Variables": JSON.stringify(variables),
+        });
+
+        console.log(data); // logs response data
+    } catch (error) {
+        console.log(error); //logs any error
+    }
+}
+
 /* ----------------------------- REQUEST HANDLER ---------------------------- */
 
 // accept a POST request with a spam string
@@ -163,36 +183,36 @@ exports.handler = async (event, context) => {
     if (data.task == "evaluate_string" && typeof data.body === "string") {
         result = evaluate(data.body);
         console.log(result)
+
+        return {
+            statusCode: 200,
+            headers: corsHeaders,
+            body: JSON.stringify(result)
+        };
     }
 
     if (data.task == "evaluate_array" && Array.isArray(data.body)) { // <--- fix here
         console.error("task not available yet")
     }
 
-    if (data.task == "test_mailjet") {
-        console.log('testing mailjet...')
+    if (data.task == "test_mailgun") {
+        console.log('sending demo email via mailgun...')
+        const templateVariables = {
+            user_email: "USER_EMAIL",
+            user_name: "USER_NAME",
+            message: "USER_MESSAGE: HELLO WORLD!",
+            moneypenny_report: "<string>",
+            moneypenny_score: "<number>",
+            moneypenny_confidence: "<number>"
+        };
 
-        if (data.task == "test_mailjet") {
-            console.log('testing mailjet...');
+        sendMailgunEmail(templateVariables)
 
-            try {
-                const result = await mailjet.post('send', { version: 'v3.1' }).request({
-                    Messages: [
-                        {
-                            From: { Email: 'louis.h.dev@gmail.com', Name: 'Ms. Moneypenny' },
-                            To: [{ Email: 'louis.h.dev@gmail.com', Name: 'You' }],
-                            Subject: 'Mailjet Test',
-                            TextPart: 'Mailjet test email.',
-                            HTMLPart: '<h3>html header test</h3>',
-                        },
-                    ],
-                });
-
-                console.log(result.body); // success
-            } catch (err) {
-                console.error(err.statusCode || err.message); // failed
-            }
-        }
+        return {
+            statusCode: 200,
+            headers: corsHeaders,
+            body: JSON.stringify(result)
+        };
     }
 
     if (data.task == "check_form" && data.body && typeof data.body === "object") { // <--- fix here
@@ -229,39 +249,7 @@ exports.handler = async (event, context) => {
         console.log(JSON.stringify(templateVariables, null, 2));
 
         // SEND EMAIL TO 616 STRENGTH
-        try {
-            const mailjetResult = await mailjet
-                .post("send", { version: "v3.1" })
-                .request({
-                    Messages: [
-                        {
-                            From: { Email: "616strength@616strength.com", Name: "616 Strength & Nutrition" },
-                            To: [{ Email: "louis.h.harrison@gmail.com", Name: "Louis H" }],
-                            Subject: `New message from user`,
-                            TemplateID: 7511790,
-                            TemplateLanguage: true,
-                            Variables: templateVariables
-                        }
-                    ]
-                });
-
-            console.log(mailjetResult.body);
-        } catch (err) {
-            console.error("=== MAILJET ERROR ===");
-
-            // Full raw error object
-            console.error(err);
-
-            // Mailjet API error body (the detailed part)
-            if (err.response && err.response.body) {
-                console.error("=== MAILJET ERROR BODY ===");
-                console.error(JSON.stringify(err.response.body, null, 2));
-            }
-
-            // Fallback if the structure is different
-            console.error("=== ERROR MESSAGE ===");
-            console.error(err.statusCode || err.message || "Unknown Mailjet error");
-        }
+        sendMailgunEmail(templateVariables);
 
         return {
             statusCode: 200,
