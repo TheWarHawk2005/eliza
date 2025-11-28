@@ -180,7 +180,7 @@ exports.handler = async (event, context) => {
 
     var result;
 
-    if (data.task == "evaluate_string" && typeof data.body === "string") {
+    if (data.task == "evaluate_string") {
         result = evaluate(data.body);
         console.log(result)
 
@@ -241,8 +241,8 @@ exports.handler = async (event, context) => {
             user_name: formName,
             message: formMessage,
             moneypenny_report: result.report.string,
-            moneypenny_score: result.spam_score,
-            moneypenny_confidence: result.spam_confidence
+            moneypenny_score: result.spam_score.toFixed(2),
+            moneypenny_confidence: result.spam_confidence.toFixed(2)
         };
 
         // SEND EMAIL TO 616 STRENGTH
