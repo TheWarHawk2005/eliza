@@ -4,8 +4,10 @@
 // Miss Moneypenny's complete script. Running on the server.
 const version = "0.0.0"
 
+import { randomUUID } from 'crypto';
 import FormData from 'form-data'; // form-data v4.0.1
 import Mailgun from 'mailgun.js'; // mailgun.js v11.1.0
+import NPoint from 'npoint'
 
 function writeReport(score, confidence) {
     // string = human-readable message
@@ -110,6 +112,23 @@ function evaluate(string) {
     }
 
     return evaluation
+}
+
+async function generateNPointTicket(data) {
+    const ticketId = crypto.randomUUID()
+    ticketObject = {
+        [ticketId]: { data }
+    }
+    const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newData)
+    });
+
+    const data = await res.json();
+    console.log("Updated:", data);
+
+    return ticketId
 }
 
 async function sendMailgunEmail(variables) {
@@ -236,13 +255,16 @@ exports.handler = async (event, context) => {
         result.name_evaluation = nameEval
         result.message_evaluation = messageEval
 
+        const ticketId = await generateNPointTicket(result) // creates an entry in npoint database and returns a ticket id
+
         const templateVariables = {
             user_email: formEmail,
             user_name: formName,
             message: formMessage,
             moneypenny_report: result.report.string,
             moneypenny_score: result.spam_score.toFixed(2),
-            moneypenny_confidence: result.spam_confidence.toFixed(2)
+            moneypenny_confidence: result.spam_confidence.toFixed(2),
+            ticket_id: ticketId
         };
 
         // SEND EMAIL TO 616 STRENGTH
