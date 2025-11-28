@@ -7,7 +7,6 @@ const version = "0.0.0"
 import { randomUUID } from 'crypto';
 import FormData from 'form-data'; // form-data v4.0.1
 import Mailgun from 'mailgun.js'; // mailgun.js v11.1.0
-import NPoint from 'npoint'
 
 function writeReport(score, confidence) {
     // string = human-readable message
@@ -115,6 +114,7 @@ function evaluate(string) {
 }
 
 async function generateNPointTicket(data) {
+    const url = `https://api.npoint.io/${process.env.NPOINT_ID}/tickets`
     const ticketId = crypto.randomUUID()
     ticketObject = {
         [ticketId]: { data }
