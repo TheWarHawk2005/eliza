@@ -123,7 +123,7 @@ async function sendMailgunEmail(variables) {
     });
     try {
         const data = await mg.messages.create('616strength.com', {
-            from: '616 Strength & Nutrition <616strength.com@616strength.com>',
+            from: '616 Strength & Nutrition <616strength@616strength.com>',
             to: ['616 Strength & Nutrition <616strength@616strength.com>'],
             subject: `New Message From ${variables.user_name}`,
             text: '',
@@ -206,7 +206,7 @@ exports.handler = async (event, context) => {
             moneypenny_confidence: "<number>"
         };
 
-        sendMailgunEmail(templateVariables)
+        await sendMailgunEmail(templateVariables)
 
         return {
             statusCode: 200,
@@ -246,7 +246,7 @@ exports.handler = async (event, context) => {
         };
 
         // SEND EMAIL TO 616 STRENGTH
-        sendMailgunEmail(templateVariables);
+        await sendMailgunEmail(templateVariables);
 
         console.log("=== VARIABLES SENT TO MAILGUN ===");
         console.log(JSON.stringify(templateVariables, null, 2));
