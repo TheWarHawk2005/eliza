@@ -113,33 +113,30 @@ function evaluate(string) {
 }
 
 async function generateNPointTicket(data) {
-    // Root to your project/document
     const baseUrl = `https://api.npoint.io/${process.env.NPOINT_ID}`;
 
-    // Create a unique ticket ID
+    // Generate a unique ticket ID
     const ticketId = crypto.randomUUID();
 
-    // Build the exact endpoint for THIS ticket only
-    // This writes to: https://api.npoint.io/<ID>/<ticketId>
-    const ticketUrl = `${baseUrl}/${ticketId}`;
-
-    // Store whatever you want inside the ticket
+    // Prepare payload to update the tickets object
     const ticketPayload = {
-        created_at: new Date().toISOString(),
-        ...data
+        tickets: {
+            [ticketId]: {
+                created_at: new Date().toISOString(),
+                ...data
+            }
+        }
     };
-
-    // Write (PUT) the ticket
-    const res = await fetch(ticketUrl, {
-        method: "PUT",
+    // Send PATCH request to add this ticket
+    const res = await fetch(baseUrl, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(ticketPayload)
     });
 
     if (!res.ok) {
-        console.error(`NPOINT PUT FAILED (${res.status})`);
         const text = await res.text();
-        console.error("Body:", text);
+        console.error(`NPOINT PATCH FAILED (${res.status})`, text);
         throw new Error("Failed to save ticket to npoint");
     }
 
@@ -272,7 +269,7 @@ exports.handler = async (event, context) => {
         result.name_evaluation = nameEval
         result.message_evaluation = messageEval
 
-        const ticketId = await generateNPointTicket(result) // creates an entry in npoint database and returns a ticket id
+        const ticketId = await generateNPointTicket(result); // creates an entry in JSONHosting database and returns a ticket id
 
         const templateVariables = {
             user_email: formEmail,
