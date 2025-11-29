@@ -115,6 +115,7 @@ function evaluate(string) {
 async function generateNPointTicket(data) {
     // Root endpoint of your npoint
     const url = `https://api.npoint.io/${process.env.NPOINT_ID}`;
+    console.log('sending request to '+url)
 
     // Create a unique ticket ID
     const ticketId = crypto.randomUUID();
