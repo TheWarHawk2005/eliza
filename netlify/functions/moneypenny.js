@@ -113,21 +113,23 @@ function evaluate(string) {
 }
 
 async function generateNPointTicket(data) {
-    const url = `https://api.npoint.io/${process.env.NPOINT_ID}/tickets`
-    const ticketId = crypto.randomUUID()
-    ticketObject = {
-        [ticketId]: { data }
-    }
+    const url = `https://api.npoint.io/${process.env.NPOINT_ID}/tickets`;
+    const ticketId = crypto.randomUUID();
+
+    const ticketObject = {
+        [ticketId]: data
+    };
+
     const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newData)
+        body: JSON.stringify(ticketObject)
     });
 
-    const data = await res.json();
-    console.log("Updated:", data);
+    const result = await res.json();
+    console.log("Updated:", result);
 
-    return ticketId
+    return ticketId;
 }
 
 async function sendMailgunEmail(variables) {
