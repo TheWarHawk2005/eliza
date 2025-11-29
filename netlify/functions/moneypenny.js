@@ -6,6 +6,7 @@ const version = "0.0.0"
 
 import FormData from 'form-data'; // form-data v4.0.1
 import Mailgun from 'mailgun.js'; // mailgun.js v11.1.0
+import { createClient } from '@supabase/supabase-js';
 
 function writeReport(score, confidence) {
     // string = human-readable message
@@ -112,40 +113,23 @@ function evaluate(string) {
     return evaluation
 }
 
-async function generateNPointTicket(data) {
-    // Root endpoint of your npoint
-    const url = `https://api.npoint.io/${process.env.NPOINT_ID}`;
-    console.log('sending request to '+url)
+const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SECRET_KEY
+);
 
-    // Create a unique ticket ID
-    const ticketId = crypto.randomUUID();
+async function generateSupabaseTicket(data) {
+    const { data: inserted, error } = await supabase
+        .from('tickets')
+        .insert([{ data }])
+        .select();
 
-    // Wrap the ticket under the "tickets" key
-    const ticketPayload = {
-        tickets: {
-            [ticketId]: {
-                created_at: new Date().toISOString(),
-                ...data
-            }
-        }
-    };
-
-    // POST the ticket to the root endpoint
-    const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(ticketPayload)
-    });
-
-    if (!res.ok) {
-        const text = await res.text();
-        console.error(`NPOINT POST FAILED (${res.status})`);
-        console.error("Body:", text);
-        throw new Error("Failed to save ticket to npoint");
+    if (error) {
+        console.error('SUPABASE INSERT FAILED', error);
+        throw new Error('Failed to save ticket to Supabase');
     }
 
-    console.log("NPOINT ticket created:", ticketId);
-    return ticketId;
+    return inserted[0].id;
 }
 
 
@@ -273,7 +257,12 @@ exports.handler = async (event, context) => {
         result.name_evaluation = nameEval
         result.message_evaluation = messageEval
 
-        const ticketId = await generateNPointTicket(result); // creates an entry in JSONHosting database and returns a ticket id
+        const ticketId = await generateSupabaseTicket({
+            name: formName,
+            email: formEmail,
+            message: formMessage,
+            spam_evaluation: result
+        });
 
         const templateVariables = {
             user_email: formEmail,
