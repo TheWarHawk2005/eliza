@@ -113,24 +113,40 @@ function evaluate(string) {
 }
 
 async function generateNPointTicket(data) {
-    const url = `https://api.npoint.io/${process.env.NPOINT_ID}/tickets`;
+    // Root to your project/document
+    const baseUrl = `https://api.npoint.io/${process.env.NPOINT_ID}`;
+
+    // Create a unique ticket ID
     const ticketId = crypto.randomUUID();
 
-    const ticketObject = {
-        [ticketId]: data
+    // Build the exact endpoint for THIS ticket only
+    // This writes to: https://api.npoint.io/<ID>/<ticketId>
+    const ticketUrl = `${baseUrl}/${ticketId}`;
+
+    // Store whatever you want inside the ticket
+    const ticketPayload = {
+        created_at: new Date().toISOString(),
+        ...data
     };
 
-    const res = await fetch(url, {
-        method: "POST",
+    // Write (PUT) the ticket
+    const res = await fetch(ticketUrl, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(ticketObject)
+        body: JSON.stringify(ticketPayload)
     });
 
-    const result = await res.json();
-    console.log("Updated:", result);
+    if (!res.ok) {
+        console.error(`NPOINT PUT FAILED (${res.status})`);
+        const text = await res.text();
+        console.error("Body:", text);
+        throw new Error("Failed to save ticket to npoint");
+    }
 
+    console.log("NPOINT ticket created:", ticketId);
     return ticketId;
 }
+
 
 async function sendMailgunEmail(variables) {
     const mailgun = new Mailgun(FormData);
