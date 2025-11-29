@@ -113,12 +113,13 @@ function evaluate(string) {
 }
 
 async function generateNPointTicket(data) {
-    const baseUrl = `https://api.npoint.io/${process.env.NPOINT_ID}`;
+    // Root endpoint of your npoint
+    const url = `https://api.npoint.io/${process.env.NPOINT_ID}`;
 
-    // Generate a unique ticket ID
+    // Create a unique ticket ID
     const ticketId = crypto.randomUUID();
 
-    // Prepare payload to update the tickets object
+    // Wrap the ticket under the "tickets" key
     const ticketPayload = {
         tickets: {
             [ticketId]: {
@@ -127,16 +128,18 @@ async function generateNPointTicket(data) {
             }
         }
     };
-    // Send PATCH request to add this ticket
-    const res = await fetch(baseUrl, {
-        method: "PATCH",
+
+    // POST the ticket to the root endpoint
+    const res = await fetch(url, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(ticketPayload)
     });
 
     if (!res.ok) {
         const text = await res.text();
-        console.error(`NPOINT PATCH FAILED (${res.status})`, text);
+        console.error(`NPOINT POST FAILED (${res.status})`);
+        console.error("Body:", text);
         throw new Error("Failed to save ticket to npoint");
     }
 
