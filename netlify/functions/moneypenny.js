@@ -133,7 +133,8 @@ async function generateSupabaseTicket(data) {
 }
 
 
-async function sendMailgunEmail(variables) {
+async function sendMailgunEmail(variables, recipients) {
+    // recipients should look like ['Recipient Name <recipient@email.com>']
     const mailgun = new Mailgun(FormData);
     const mg = mailgun.client({
         username: 'api',
@@ -145,7 +146,7 @@ async function sendMailgunEmail(variables) {
     try {
         const data = await mg.messages.create('616strength.com', {
             from: '616 Strength & Nutrition <616strength@616strength.com>',
-            to: ['616 Strength & Nutrition <616strength@616strength.com>'],
+            to: recipients,
             subject: `New Message From ${variables.user_name}`,
             text: '',
             template: "616 Strength Website Notification",
@@ -275,7 +276,18 @@ exports.handler = async (event, context) => {
         };
 
         // SEND EMAIL TO 616 STRENGTH
-        await sendMailgunEmail(templateVariables);
+
+        if (result.report.decision == 'clean') {
+            await sendMailgunEmail(templateVariables, [
+                '616 Strength & Nutrition <616strength@616strength.com>', 
+                'Louis Harrison <louis.h.harrison@gmail.com>'
+            ]);
+        } else if (result.report.decision == 'unsure' || result.report.decision == 'spam') {
+            await sendMailgunEmail(templateVariables, [
+                'Louis Harrison <louis.h.harrison@gmail.com>'
+            ]);
+        }
+
 
         console.log("=== VARIABLES SENT TO MAILGUN ===");
         console.log(JSON.stringify(templateVariables, null, 2));
